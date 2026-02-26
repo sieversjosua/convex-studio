@@ -17,7 +17,6 @@ interface Deployment {
   status: "connected" | "error" | "pending";
   lastChecked?: number;
   errorMessage?: string;
-  userId: string;
 }
 
 interface LogEntry {
@@ -29,7 +28,6 @@ interface LogEntry {
   timestamp: number;
   functionName?: string;
   requestId?: string;
-  userId: string;
 }
 
 export default function DashboardPage() {

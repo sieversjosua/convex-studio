@@ -30,7 +30,7 @@ import { Plus, Server, Trash2, RefreshCw, ExternalLink, Loader2 } from "lucide-r
 type Environment = "dev" | "prod" | "staging";
 
 interface Deployment {
-  _id: string;
+  _id: Id<"deployments">;
   _creationTime: number;
   name: string;
   url: string;
@@ -39,7 +39,6 @@ interface Deployment {
   status: "connected" | "error" | "pending";
   lastChecked?: number;
   errorMessage?: string;
-  userId: string;
 }
 
 export default function DeploymentsPage() {

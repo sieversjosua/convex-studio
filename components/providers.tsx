@@ -1,9 +1,6 @@
 "use client";
 
-import { ClerkProvider, useAuth } from "@clerk/nextjs";
-import { ConvexProviderWithClerk } from "convex/react-clerk";
-import { ConvexReactClient } from "convex/react";
-import { dark } from "@clerk/themes";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ReactNode, useMemo } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -19,23 +16,18 @@ function ConvexClientProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ConvexProviderWithClerk client={client} useAuth={useAuth}>
+    <ConvexProvider client={client}>
       {children}
-    </ConvexProviderWithClerk>
+    </ConvexProvider>
   );
 }
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <ClerkProvider
-      appearance={{ baseTheme: dark }}
-      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-    >
-      <ConvexClientProvider>
-        <TooltipProvider>
-          {children}
-        </TooltipProvider>
-      </ConvexClientProvider>
-    </ClerkProvider>
+    <ConvexClientProvider>
+      <TooltipProvider>
+        {children}
+      </TooltipProvider>
+    </ConvexClientProvider>
   );
 }

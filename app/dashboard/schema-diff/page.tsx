@@ -36,7 +36,6 @@ interface Deployment {
   status: "connected" | "error" | "pending";
   lastChecked?: number;
   errorMessage?: string;
-  userId: string;
 }
 
 interface SchemaTable {

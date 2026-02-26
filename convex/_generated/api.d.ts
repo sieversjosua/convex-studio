@@ -34,9 +34,9 @@ declare const fullApi: ApiFromModules<{
 }>;
 export declare const api: FilterApi<
   typeof fullApi,
-  FunctionReference<"public">
+  FunctionReference<any, "public">
 >;
 export declare const internal: FilterApi<
   typeof fullApi,
-  FunctionReference<"internal">
+  FunctionReference<any, "internal">
 >;

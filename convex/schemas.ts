@@ -4,27 +4,21 @@ import { mutation, query } from "./_generated/server";
 export const getCached = query({
   args: { deploymentId: v.id("deployments") },
   handler: async (ctx, { deploymentId }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return null;
-    const cached = await ctx.db
+    return ctx.db
       .query("cachedSchemas")
       .withIndex("by_deployment", (q) => q.eq("deploymentId", deploymentId))
       .unique();
-    if (!cached || cached.userId !== identity.subject) return null;
-    return cached;
   },
 });
 
 export const getTableNames = query({
   args: { deploymentId: v.id("deployments") },
   handler: async (ctx, { deploymentId }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
     const cached = await ctx.db
       .query("cachedSchemas")
       .withIndex("by_deployment", (q) => q.eq("deploymentId", deploymentId))
       .unique();
-    if (!cached || cached.userId !== identity.subject) return [];
+    if (!cached) return [];
     try {
       const data: { tables?: Array<{ name: string }> } = JSON.parse(
         cached.schema
@@ -52,8 +46,6 @@ export const upsert = mutation({
     schema: v.string(),
   },
   handler: async (ctx, { deploymentId, schema }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
     const existing = await ctx.db
       .query("cachedSchemas")
       .withIndex("by_deployment", (q) => q.eq("deploymentId", deploymentId))
@@ -65,7 +57,6 @@ export const upsert = mutation({
         deploymentId,
         schema,
         fetchedAt: Date.now(),
-        userId: identity.subject,
       });
     }
   },

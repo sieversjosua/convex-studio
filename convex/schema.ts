@@ -10,10 +10,7 @@ export default defineSchema({
     status: v.union(v.literal("connected"), v.literal("error"), v.literal("pending")),
     lastChecked: v.optional(v.number()),
     errorMessage: v.optional(v.string()),
-    userId: v.string(),
-  })
-    .index("by_user", ["userId"])
-    .index("by_user_and_env", ["userId", "environment"]),
+  }).index("by_env", ["environment"]),
 
   logs: defineTable({
     deploymentId: v.id("deployments"),
@@ -22,16 +19,13 @@ export default defineSchema({
     timestamp: v.number(),
     functionName: v.optional(v.string()),
     requestId: v.optional(v.string()),
-    userId: v.string(),
   })
     .index("by_deployment", ["deploymentId", "timestamp"])
-    .index("by_user", ["userId", "timestamp"])
     .index("by_level", ["deploymentId", "level", "timestamp"]),
 
   cachedSchemas: defineTable({
     deploymentId: v.id("deployments"),
     schema: v.string(),
     fetchedAt: v.number(),
-    userId: v.string(),
   }).index("by_deployment", ["deploymentId"]),
 });

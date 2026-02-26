@@ -28,9 +28,8 @@ export const upsertSchemaInternal = internalMutation({
   args: {
     deploymentId: v.id("deployments"),
     schema: v.string(),
-    userId: v.string(),
   },
-  handler: async (ctx, { deploymentId, schema, userId }) => {
+  handler: async (ctx, { deploymentId, schema }) => {
     const existing = await ctx.db
       .query("cachedSchemas")
       .withIndex("by_deployment", (q) => q.eq("deploymentId", deploymentId))
@@ -42,7 +41,6 @@ export const upsertSchemaInternal = internalMutation({
         deploymentId,
         schema,
         fetchedAt: Date.now(),
-        userId,
       });
     }
   },
@@ -54,14 +52,11 @@ export const checkConnection = action({
     ctx,
     { deploymentId }
   ): Promise<{ success: boolean; error?: string }> => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
     const deployment = await ctx.runQuery(
       internal.deploymentApi.getDeploymentInternal,
       { id: deploymentId }
     );
-    if (!deployment || deployment.userId !== identity.subject) {
+    if (!deployment) {
       throw new Error("Deployment not found");
     }
 
@@ -97,14 +92,11 @@ export const fetchSchema = action({
     ctx,
     { deploymentId }
   ): Promise<{ success: boolean; error?: string }> => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
     const deployment = await ctx.runQuery(
       internal.deploymentApi.getDeploymentInternal,
       { id: deploymentId }
     );
-    if (!deployment || deployment.userId !== identity.subject) {
+    if (!deployment) {
       throw new Error("Deployment not found");
     }
 
@@ -125,7 +117,6 @@ export const fetchSchema = action({
         await ctx.runMutation(internal.deploymentApi.upsertSchemaInternal, {
           deploymentId,
           schema: schemaText,
-          userId: identity.subject,
         });
         return { success: true };
       }
@@ -152,14 +143,11 @@ export const queryDocuments = action({
     ctx,
     { deploymentId, tableName, cursor, limit }
   ): Promise<{ success: boolean; documents?: string; error?: string }> => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
     const deployment = await ctx.runQuery(
       internal.deploymentApi.getDeploymentInternal,
       { id: deploymentId }
     );
-    if (!deployment || deployment.userId !== identity.subject) {
+    if (!deployment) {
       throw new Error("Deployment not found");
     }
 

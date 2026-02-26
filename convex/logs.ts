@@ -8,9 +8,6 @@ export const list = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, { deploymentId, level, limit }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
-
     const resultLimit = limit ?? 100;
 
     if (deploymentId && level) {
@@ -33,7 +30,6 @@ export const list = query({
 
     return ctx.db
       .query("logs")
-      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
       .order("desc")
       .take(resultLimit);
   },
@@ -48,12 +44,9 @@ export const add = mutation({
     requestId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
     return ctx.db.insert("logs", {
       ...args,
       timestamp: Date.now(),
-      userId: identity.subject,
     });
   },
 });
@@ -61,16 +54,12 @@ export const add = mutation({
 export const clear = mutation({
   args: { deploymentId: v.id("deployments") },
   handler: async (ctx, { deploymentId }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
     const logs = await ctx.db
       .query("logs")
       .withIndex("by_deployment", (q) => q.eq("deploymentId", deploymentId))
       .collect();
     for (const log of logs) {
-      if (log.userId === identity.subject) {
-        await ctx.db.delete(log._id);
-      }
+      await ctx.db.delete(log._id);
     }
   },
 });
